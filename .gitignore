@@ -1,0 +1,6 @@
+node_modules/
+!src/__tests__/env/.*
+dist/*
+.DS_Store
+
+analysis.md
