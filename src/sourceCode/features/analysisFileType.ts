@@ -6,17 +6,7 @@
  */
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { getRootPath } from '../../utils';
 import FileAnalysis, { IFileInfo } from '../../utils/fileAnalysis';
-
-interface IFileTypeItem {
-  /** 文件类型 */
-  type: string;
-  /** 文件数量 */
-  count: number;
-  /** 文件占比 */
-  percent: string;
-}
 
 export interface IAnalysisResult {
   /** 文件数量 */
@@ -37,8 +27,6 @@ export interface IAnalysisResult {
   projectBlanks: number;
   /** 项目的总代码复杂度 */
   projectComplexity: number;
-  /** 文件类型列表 */
-  fileTypeList: IFileTypeItem[];
 }
 
 // 递归获取文件夹中的文件列表
@@ -65,7 +53,7 @@ export default class AnalysisFileType {
   }
   public analysis(): IAnalysisResult {
     // 文件列表
-    const filePaths = getFileList(path.resolve(getRootPath(), this.dirPath));
+    const filePaths = getFileList(path.resolve(process.cwd(), this.dirPath));
     // 统计文件数量
     const fileCount = filePaths.length
     // 分析文件内容
@@ -99,25 +87,6 @@ export default class AnalysisFileType {
       return pre + (cur.complexity || 0);
     }, 0);
 
-    // 文件类型列表
-    const fileTypeList = fileInfoList.reduce<IFileTypeItem[]>((pre, cur) => {
-      const fileType = cur.type;
-      const fileTypeIndex = pre.findIndex((item) => item.type === fileType);
-      if (fileTypeIndex === -1) {
-        pre.push({
-          type: fileType,
-          count: 1,
-          percent: ((1 / fileInfoList.length) * 100).toFixed(2) + '%',
-        });
-      } else {
-        pre[fileTypeIndex].count++;
-        pre[fileTypeIndex].percent =
-          ((pre[fileTypeIndex].count / fileInfoList.length) * 100).toFixed(2) +
-          '%';
-      }
-      return pre;
-    }, []);
-
     return {
       fileCount,
       fileInfoList,
@@ -128,7 +97,6 @@ export default class AnalysisFileType {
       projectComments,
       projectBlanks,
       projectComplexity,
-      fileTypeList,
     };
   }
 }
